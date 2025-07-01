@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compteurs RP</title>
+
+  <!-- Manifest pour PWA simple (installation possible) -->
+  <link rel="manifest" href="manifest.json" />
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 40px 10px;
+      background-image: url('https://i.postimg.cc/RFkgnx7C/fond-rp.avif');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center center;
+      background-repeat: no-repeat;
+      color: #5b3a00;
+      font-family: 'Uncial Antiqua', cursive;
+      text-align: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    h1, h2 {
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+    }
+    form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    input[type="text"], select, input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-family: 'Uncial Antiqua', cursive;
+      font-size: 1rem;
+      color: #5b3a00;
+      box-sizing: border-box;
+    }
+    input[type="submit"], button {
+      padding: 6px 10px;
+      border: none;
+      background-color: #c49a3f;
+      color: white;
+      font-weight: bold;
+      font-family: 'Uncial Antiqua', cursive;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background-color 0.3s, transform 0.3s;
+      margin: 3px;
+      min-width: 60px;
+      box-sizing: border-box;
+    }
+    input[type="submit"]:hover, button:hover {
+      background-color: #a47d2f;
+      transform: scale(1.05);
+    }
+    .compteur {
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      width: 100%;
+      box-sizing: border-box;
+      position: relative;
+    }
+    .confirm-box {
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1px solid #c49a3f;
+      padding: 10px;
+      border-radius: 8px;
+      display: inline-block;
+      color: #5b3a00;
+      font-family: 'Uncial Antiqua', cursive;
+      margin-top: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+    .modifier-form {
+      margin-top: 10px;
+      display: none;
+      justify-content: center;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Compteurs RP</h1>
+
+    <!-- Formulaire d'ajout -->
+    <form id="addForm">
+      <input type="text" id="nomInput" placeholder="Nom du compteur" required />
+      <select id="couleurSelect" required>
+        <option disabled selected>-- Choisis une couleur --</option>
+        <optgroup label="Classiques">
+          <option value="white">Blanc</option>
+          <option value="black">Noir</option>
+          <option value="gray">Gris</option>
+        </optgroup>
+        <optgroup label="Bleus">
+          <option value="lightblue">Bleu clair</option>
+          <option value="skyblue">Bleu ciel</option>
+          <option value="dodgerblue">Bleu vif</option>
+          <option value="navy">Bleu marine</option>
+        </optgroup>
+        <optgroup label="Verts">
+          <option value="lightgreen">Vert clair</option>
+          <option value="limegreen">Vert vif</option>
+          <option value="seagreen">Vert mer</option>
+          <option value="darkgreen">Vert foncé</option>
+        </optgroup>
+        <optgroup label="Rouges / Roses">
+          <option value="lightpink">Rose clair</option>
+          <option value="hotpink">Rose vif</option>
+          <option value="salmon">Saumon</option>
+          <option value="crimson">Rouge profond</option>
+          <option value="firebrick">Brique</option>
+        </optgroup>
+        <optgroup label="Oranges / Jaunes">
+          <option value="khaki">Jaune doux</option>
+          <option value="gold">Or</option>
+          <option value="orange">Orange</option>
+          <option value="coral">Corail</option>
+        </optgroup>
+        <optgroup label="Violets / Mystiques">
+          <option value="lavender">Lavande</option>
+          <option value="plum">Prune</option>
+          <option value="violet">Violet</option>
+          <option value="indigo">Indigo</option>
+          <option value="mediumorchid">Orchidée</option>
+        </optgroup>
+        <optgroup label="Autres">
+          <option value="beige">Beige</option>
+          <option value="wheat">Blé</option>
+          <option value="peru">Terre</option>
+          <option value="slateblue">Bleu ardoise</option>
+          <option value="rosybrown">Rose brun</option>
+        </optgroup>
+      </select>
+      <input type="submit" value="➕ Ajouter un compteur" />
+    </form>
+
+    <!-- Boutons généraux -->
+    <div style="width: 100%; margin: 8px 0;">
+      <button id="incAllBtn">+1 jour à tous les compteurs</button>
+    </div>
+    <div style="width: 100%; margin: 8px 0 20px 0;">
+      <button id="decAllBtn">-1 jour à tous les compteurs</button>
+    </div>
+
+    <!-- Conteneur pour les compteurs -->
+    <div id="compteursContainer"></div>
+  </div>
+
+  <script>
+    let compteurs = JSON.parse(localStorage.getItem('compteurs')) || {};
+
+    const compteursContainer = document.getElementById('compteursContainer');
+    const addForm = document.getElementById('addForm');
+    const nomInput = document.getElementById('nomInput');
+    const couleurSelect = document.getElementById('couleurSelect');
+    const incAllBtn = document.getElementById('incAllBtn');
+    const decAllBtn = document.getElementById('decAllBtn');
+
+    function save() {
+      localStorage.setItem('compteurs', JSON.stringify(compteurs));
+    }
+
+    function render() {
+      compteursContainer.innerHTML = '';
+      const noms = Object.keys(compteurs);
+      if (noms.length === 0) {
+        compteursContainer.innerHTML = '<p>Aucun compteur pour l’instant.</p>';
+        return;
+      }
+
+      noms.forEach((nom) => {
+        const val = compteurs[nom].val;
+        const couleur = compteurs[nom].couleur;
+
+        const div = document.createElement('div');
+        div.className = 'compteur';
+        div.style.backgroundColor = couleur;
+
+        const h2 = document.createElement('h2');
+        h2.textContent = nom;
+        div.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.textContent = val >= 0 ? 'J+' + val : 'J' + val;
+        div.appendChild(p);
+
+        const incBtn = document.createElement('button');
+        incBtn.textContent = '+1 jour';
+        incBtn.onclick = () => {
+          compteurs[nom].val++;
+          save();
+          render();
+        };
+        div.appendChild(incBtn);
+
+        const decBtn = document.createElement('button');
+        decBtn.textContent = '-1 jour';
+        decBtn.onclick = () => {
+          compteurs[nom].val--;
+          save();
+          render();
+        };
+        div.appendChild(decBtn);
+
+        const resetBtn = document.createElement('button');
+        resetBtn.textContent = 'Réinitialiser';
+        resetBtn.onclick = () => {
+          compteurs[nom].val = 0;
+          save();
+          render();
+        };
+        div.appendChild(resetBtn);
+
+        const modifBtn = document.createElement('button');
+        modifBtn.textContent = 'Modifier nombre de jours';
+        div.appendChild(modifBtn);
+
+        const modifForm = document.createElement('form');
+        modifForm.style.display = 'none';
+        modifForm.className = 'modifier-form';
+
+        const inputNumber = document.createElement('input');
+        inputNumber.type = 'number';
+        inputNumber.value = val;
+        inputNumber.style.width = '80px';
+        inputNumber.required = true;
+        modifForm.appendChild(inputNumber);
+
+        const validerBtn = document.createElement('button');
+        validerBtn.type = 'submit';
+        validerBtn.textContent = 'Définir';
+        modifForm.appendChild(validerBtn);
+
+        modifBtn.onclick = () => {
+          modifForm.style.display =
+            modifForm.style.display === 'flex' ? 'none' : 'flex';
+        };
+
+        modifForm.onsubmit = (e) => {
+          e.preventDefault();
+          const newVal = Number(inputNumber.value);
+          if (isNaN(newVal)) {
+            alert('Entre un nombre valide (positif ou négatif) !');
+            return;
+          }
+          compteurs[nom].val = newVal;
+          save();
+          render();
+        };
+
+        div.appendChild(modifForm);
+
+        const supprBtn = document.createElement('button');
+        supprBtn.textContent = 'Supprimer';
+        div.appendChild(supprBtn);
+
+        const confirmBox = document.createElement('div');
+        confirmBox.className = 'confirm-box';
+        confirmBox.style.display = 'none';
+        confirmBox.innerHTML = `
+          <p>Tu es sûr de vouloir supprimer ce compteur ?</p>
+          <button>Oui</button>
+          <button>Non</button>
+        `;
+        div.appendChild(confirmBox);
+
+        supprBtn.onclick = () => {
+          confirmBox.style.display = 'inline-block';
+        };
+
+        const [ouiBtn, nonBtn] = confirmBox.querySelectorAll('button');
+        ouiBtn.onclick = () => {
+          delete compteurs[nom];
+          save();
+          render();
+        };
+        nonBtn.onclick = () => {
+          confirmBox.style.display = 'none';
+        };
+
+        compteursContainer.appendChild(div);
+      });
+    }
+
+    addForm.onsubmit = (e) => {
+      e.preventDefault();
+      const nom = nomInput.value.trim();
+      const couleur = couleurSelect.value;
+      if (!nom) {
+        alert('Entre un nom valide !');
+        return;
+      }
+      if (compteurs[nom]) {
+        alert('Ce compteur existe déjà !');
+        return;
+      }
+      compteurs[nom] = { val: 0, couleur };
+      save();
+      render();
+      addForm.reset();
+    };
+
+    incAllBtn.onclick = () => {
+      Object.keys(compteurs).forEach((nom) => {
+        compteurs[nom].val++;
+      });
+      save();
+      render();
+    };
+
+    decAllBtn.onclick = () => {
+      Object.keys(compteurs).forEach((nom) => {
+        compteurs[nom].val--;
+      });
+      save();
+      render();
+    };
+
+    render();
+  </script>
+</body>
+</html>
